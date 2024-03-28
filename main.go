@@ -10,6 +10,20 @@ import (
 	"github.com/joho/godotenv"
 )
 
+func respondWithError(w http.ResponseWriter, code int, msg string) {
+	if code > 499 {
+		log.Printf("Respondign with 5XX error: %v", msg)
+	}
+
+	type errResponse struct {
+		Error string `json:"error"`
+	}
+
+	respondWithJSON(w, code, errResponse{
+		Error: msg,
+	})
+}
+
 func main() {
 
 	err := godotenv.Load()
@@ -32,6 +46,7 @@ func main() {
 
 	v1Router := chi.NewRouter()
 	v1Router.Get("/healthz", handleRediness)
+	v1Router.Get("/err", handleErr)
 
 	router.Mount("/v1", v1Router)
 
